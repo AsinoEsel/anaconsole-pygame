@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Anaconsole"
+version = "0.0.1"
+description = ""
+authors = [
+    { name = "Dachboden", email = "info@dachboden.berlin" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "pygame",
+    "pyperclip",
+]
+
+[tool.setuptools]
+packages = { find = {} }
+
+[tool.setuptools.package-data]
+"anaconsole.assets" = ["*.png", "*.ttf"]
