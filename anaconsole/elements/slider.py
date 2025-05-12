@@ -1,8 +1,8 @@
 import pygame as pg
 from typing import Type, Union, TYPE_CHECKING, Optional, Callable
-from .dev_overlay_element import DeveloperOverlayElement
+from anaconsole.dev_overlay_element import DeveloperOverlayElement
 if TYPE_CHECKING:
-    from .dev_overlay import DeveloperOverlay
+    from anaconsole.dev_overlay import DeveloperOverlay
 
 
 class Slider(DeveloperOverlayElement):

@@ -2,9 +2,9 @@ import pygame as pg
 import sys
 from typing import Any
 from types import SimpleNamespace
-from .dev_console import DeveloperConsole, Logger, OutputRedirector
+from .elements.dev_console import DeveloperConsole, Logger, OutputRedirector
 from .dev_overlay_element import DeveloperOverlayElement
-from .input_box import Autocomplete
+from .elements.input_box import Autocomplete
 from .assets import load_file_stream
 from .mousemotion2 import MOUSEMOTION_2
 from collections import deque
@@ -22,8 +22,8 @@ class DeveloperOverlay(DeveloperOverlayElement):
     ERROR_COLOR: tuple[int, int, int] = (255, 64, 64)
 
     def __init__(self,
-                 namespaces: dict[str:Any],
                  surface: pg.Surface,
+                 namespaces: dict[str:Any] | None = None,
                  *,
                  enable_cheats: bool = False,
                  primary_font_override: pg.font.Font | None = None,
@@ -56,7 +56,7 @@ class DeveloperOverlay(DeveloperOverlayElement):
         self._frame_time_buffer_length: int = max(1, int(self._frame_time_buffer_time_seconds * self._target_framerate)) if self._target_framerate is not None else 100
         self._frame_times_ms: deque[int] = deque(maxlen=self._frame_time_buffer_length)
 
-        self.namespace = SimpleNamespace(dev_console=self.dev_console, pg=pg, **namespaces)
+        self.namespace = SimpleNamespace(dev_console=self.dev_console, pg=pg, **namespaces if namespaces else dict())
         sys.stdout = OutputRedirector(self.dev_console.log.print, self._logger.print)
 
     def handle_event(self, event: pg.event.Event) -> bool:

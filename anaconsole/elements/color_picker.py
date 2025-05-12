@@ -2,15 +2,15 @@ import pygame as pg
 import numpy as np
 import colorsys
 import math
-from .assets import load_file_stream
-from .dev_overlay_element import DeveloperOverlayElement
+from anaconsole.assets import load_file_stream
+from anaconsole.dev_overlay_element import DeveloperOverlayElement
 from .slider import Slider
 from .button import Button
 from .window import Window
 from .input_box import InputBox
 from typing import Optional, TYPE_CHECKING, Callable
 if TYPE_CHECKING:
-    from .dev_overlay import DeveloperOverlay
+    from anaconsole.dev_overlay import DeveloperOverlay
 
 
 def generate_color_wheel(size: int) -> pg.Surface:

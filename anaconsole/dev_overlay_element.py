@@ -1,8 +1,8 @@
 import pygame as pg
 from typing import TYPE_CHECKING, Optional, Union
 if TYPE_CHECKING:
-    from .dev_overlay import DeveloperOverlay
-    from .window import Window
+    from anaconsole.dev_overlay import DeveloperOverlay
+    from anaconsole.elements.window import Window
 
 
 class DeveloperOverlayElement:
@@ -29,7 +29,7 @@ class DeveloperOverlayElement:
         return pg.Rect(current_x, current_y, self.rect.w, self.rect.h)
 
     def get_parent_window(self) -> Union["Window", None]:
-        from .window import Window
+        from .elements import Window
         from .dev_overlay import DeveloperOverlay
         current = self
         while not isinstance(current, Window):

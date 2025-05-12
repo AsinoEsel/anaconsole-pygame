@@ -1,6 +1,6 @@
 import pygame as pg
-from .assets import load_file_stream
-from .dev_overlay_element import DeveloperOverlayElement
+from anaconsole.assets import load_file_stream
+from anaconsole.dev_overlay_element import DeveloperOverlayElement
 from .checkbox import Checkbox
 from .button import Button
 from .slider import Slider
@@ -10,7 +10,7 @@ from .color_picker import ColorButton
 from typing import Callable, TYPE_CHECKING, Optional, Any, get_type_hints, Type
 from types import MethodType
 if TYPE_CHECKING:
-    from .dev_overlay import DeveloperOverlay
+    from anaconsole.dev_overlay import DeveloperOverlay
 
 
 class Variable(DeveloperOverlayElement):

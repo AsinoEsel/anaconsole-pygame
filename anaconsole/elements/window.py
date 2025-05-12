@@ -1,10 +1,10 @@
 import pygame as pg
-from .assets import load_file_stream
-from .dev_overlay_element import DeveloperOverlayElement
+from anaconsole.assets import load_file_stream
+from anaconsole.dev_overlay_element import DeveloperOverlayElement
 from .button import Button
 from typing import TYPE_CHECKING, Optional
 if TYPE_CHECKING:
-    from .dev_overlay import DeveloperOverlay
+    from anaconsole.dev_overlay import DeveloperOverlay
 
 
 class Window(DeveloperOverlayElement):

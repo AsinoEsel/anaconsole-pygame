@@ -7,15 +7,15 @@ from itertools import islice
 import types
 import sys
 from collections import deque
-from .dev_overlay_element import DeveloperOverlayElement
+from anaconsole.dev_overlay_element import DeveloperOverlayElement
 from .button import Button
 from .input_box import InputBox, Autocomplete
 from .variable_monitor import VariableMonitorWindow
 from pathlib import Path
 import traceback
-from .assets import load_file_stream
+from anaconsole.assets import load_file_stream
 if TYPE_CHECKING:
-    from .dev_overlay import DeveloperOverlay
+    from anaconsole.dev_overlay import DeveloperOverlay
 
 
 CommandCarrierType = Any  # Any namespace that contains console commands

@@ -1,9 +1,9 @@
 import pygame as pg
-from .dev_overlay_element import DeveloperOverlayElement
+from anaconsole.dev_overlay_element import DeveloperOverlayElement
 from typing import Callable, TYPE_CHECKING, Optional
-from .mousemotion2 import MOUSEMOTION_2
+from anaconsole.mousemotion2 import MOUSEMOTION_2
 if TYPE_CHECKING:
-    from .dev_overlay import DeveloperOverlay
+    from anaconsole.dev_overlay import DeveloperOverlay
 
 
 class Button(DeveloperOverlayElement):

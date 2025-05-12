@@ -1,10 +1,10 @@
 import pygame as pg
 import pyperclip
-from .dev_overlay_element import DeveloperOverlayElement
+from anaconsole.dev_overlay_element import DeveloperOverlayElement
 from typing import Callable, TYPE_CHECKING, Literal
 from dataclasses import dataclass
 if TYPE_CHECKING:
-    from .dev_overlay import DeveloperOverlay
+    from anaconsole.dev_overlay import DeveloperOverlay
 
 
 class Autocomplete(DeveloperOverlayElement):

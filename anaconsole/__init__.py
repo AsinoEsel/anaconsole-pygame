@@ -1,3 +1,3 @@
 from .dev_overlay import DeveloperOverlay
-from .dev_console import console_command
-from .input_box import Autocomplete
+from .elements.dev_console import console_command
+from .elements.input_box import Autocomplete
