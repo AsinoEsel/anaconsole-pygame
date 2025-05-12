@@ -3,7 +3,7 @@ import sys
 from typing import Any
 from types import SimpleNamespace
 from .elements.dev_console import DeveloperConsole, Logger, OutputRedirector
-from .dev_overlay_element import DeveloperOverlayElement
+from .elements import BaseElement
 from .elements.input_box import Autocomplete
 from .assets import load_file_stream
 from .mousemotion2 import MOUSEMOTION_2
@@ -11,7 +11,7 @@ from collections import deque
 from time import perf_counter
 
 
-class DeveloperOverlay(DeveloperOverlayElement):
+class DeveloperOverlay(BaseElement):
     PRIMARY_COLOR: tuple[int, int, int] = (76, 88, 68)
     SECONDARY_COLOR: tuple[int, int, int] = (62, 70, 55)
     PRIMARY_TEXT_COLOR: tuple[int, int, int] = (255, 255, 255)

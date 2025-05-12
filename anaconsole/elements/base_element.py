@@ -5,21 +5,21 @@ if TYPE_CHECKING:
     from anaconsole.elements.window import Window
 
 
-class DeveloperOverlayElement:
+class BaseElement:
     INSET: bool = False
 
-    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["DeveloperOverlayElement"], rect: pg.Rect, *, colorkey: tuple[int, int, int] | None = None):
+    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["BaseElement"], rect: pg.Rect, *, colorkey: tuple[int, int, int] | None = None):
         self.overlay: "DeveloperOverlay" = overlay
-        self.parent: DeveloperOverlayElement | None = parent
+        self.parent: BaseElement | None = parent
         self.rect: pg.Rect = rect
         self.surface: pg.Surface = pg.Surface(rect.size)
         if colorkey:
             self.surface.set_colorkey(colorkey)
-        self.children: list[DeveloperOverlayElement] = []
-        self.selected_child: DeveloperOverlayElement | None = None
+        self.children: list[BaseElement] = []
+        self.selected_child: BaseElement | None = None
 
     def get_absolute_rect(self) -> pg.Rect:
-        from .dev_overlay import DeveloperOverlay
+        from anaconsole.dev_overlay import DeveloperOverlay
         current = self
         current_x, current_y = 0, 0
         while not isinstance(current, DeveloperOverlay):
@@ -29,8 +29,8 @@ class DeveloperOverlayElement:
         return pg.Rect(current_x, current_y, self.rect.w, self.rect.h)
 
     def get_parent_window(self) -> Union["Window", None]:
-        from .elements import Window
-        from .dev_overlay import DeveloperOverlay
+        from anaconsole.dev_overlay import DeveloperOverlay
+        from .window import Window
         current = self
         while not isinstance(current, Window):
             if isinstance(current, DeveloperOverlay):
@@ -110,7 +110,7 @@ class DeveloperOverlayElement:
             self.selected_child = self.children[index]
             self.selected_child.selected_child = None
 
-    def get_selected_element(self) -> Optional["DeveloperOverlayElement"]:
+    def get_selected_element(self) -> Optional["BaseElement"]:
         current = self
         while current.selected_child is not None:
             current = current.selected_child

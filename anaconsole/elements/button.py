@@ -1,13 +1,13 @@
 import pygame as pg
-from anaconsole.dev_overlay_element import DeveloperOverlayElement
+from .base_element import BaseElement
 from typing import Callable, TYPE_CHECKING, Optional
 from anaconsole.mousemotion2 import MOUSEMOTION_2
 if TYPE_CHECKING:
     from anaconsole.dev_overlay import DeveloperOverlay
 
 
-class Button(DeveloperOverlayElement):
-    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["DeveloperOverlayElement"], rect: pg.Rect, callback: Callable[[], None], *, image: pg.Surface | None = None, toggle: bool = False):
+class Button(BaseElement):
+    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["BaseElement"], rect: pg.Rect, callback: Callable[[], None], *, image: pg.Surface | None = None, toggle: bool = False):
         super().__init__(overlay, parent, rect)
         self.callback: Callable[[], None] = callback
         self.image: pg.Surface | None = image

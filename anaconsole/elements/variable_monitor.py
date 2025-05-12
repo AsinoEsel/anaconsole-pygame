@@ -1,6 +1,6 @@
 import pygame as pg
 from anaconsole.assets import load_file_stream
-from anaconsole.dev_overlay_element import DeveloperOverlayElement
+from .base_element import BaseElement
 from .checkbox import Checkbox
 from .button import Button
 from .slider import Slider
@@ -13,8 +13,8 @@ if TYPE_CHECKING:
     from anaconsole.dev_overlay import DeveloperOverlay
 
 
-class Variable(DeveloperOverlayElement):
-    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["DeveloperOverlayElement"], rect: pg.Rect,
+class Variable(BaseElement):
+    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["BaseElement"], rect: pg.Rect,
                  var_name: str, var_type: type, var_getter: Callable[[], Any], var_setter: Callable[[Any], None], **kwargs):
         super().__init__(overlay, parent, rect)
         self.name: str = var_name
@@ -77,8 +77,8 @@ class Variable(DeveloperOverlayElement):
         self.surface.blit(val_surf, (self.rect.w - edit_element_width - val_surf.get_width() - offset, offset))
 
 
-class VariableMonitor(DeveloperOverlayElement):
-    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["DeveloperOverlayElement"], rect: pg.Rect):
+class VariableMonitor(BaseElement):
+    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["BaseElement"], rect: pg.Rect):
         super().__init__(overlay, parent, rect)
         self.variable_height: int = int(overlay.char_height * 1.75) // 2 * 2
         add_image: pg.Surface = pg.image.load(load_file_stream("add.png"))
@@ -141,6 +141,6 @@ class VariableMonitor(DeveloperOverlayElement):
 class VariableMonitorWindow(Window):
     SIZE: tuple[int, int] = (400, 450)
 
-    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["DeveloperOverlayElement"], rect: pg.Rect):
+    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["BaseElement"], rect: pg.Rect):
         super().__init__(overlay, parent, rect, title="Variable Monitor Window")
         self.children.append(VariableMonitor(overlay, self, self.body_rect))

@@ -1,13 +1,13 @@
 import pygame as pg
 import pyperclip
-from anaconsole.dev_overlay_element import DeveloperOverlayElement
+from .base_element import BaseElement
 from typing import Callable, TYPE_CHECKING, Literal
 from dataclasses import dataclass
 if TYPE_CHECKING:
     from anaconsole.dev_overlay import DeveloperOverlay
 
 
-class Autocomplete(DeveloperOverlayElement):
+class Autocomplete(BaseElement):
     MAX_HINT_LENGTH = 32
     MAX_UNSHORTENED_HINT_LENGTH = 16
 
@@ -66,11 +66,11 @@ class Autocomplete(DeveloperOverlayElement):
         self.draw_border_rect(self.surface, pg.Rect(0, 0, self.surface.get_width(), self.surface.get_height()))  # TODO: cannot use self.render_border() here
 
 
-class InputBox(DeveloperOverlayElement):
+class InputBox(BaseElement):
     INSET: bool = True
     STOP_CHARS: tuple[str] = (' ', '.', ',')
 
-    def __init__(self, overlay: "DeveloperOverlay", parent: "DeveloperOverlayElement", rect: pg.Rect,
+    def __init__(self, overlay: "DeveloperOverlay", parent: "BaseElement", rect: pg.Rect,
                  getter: Callable[[], str] | None = None,
                  setter: Callable[[str], None] = lambda x: None, *,
                  clear_on_send: bool = False,

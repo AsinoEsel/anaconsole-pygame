@@ -1,17 +1,17 @@
 import pygame as pg
 from anaconsole.assets import load_file_stream
-from anaconsole.dev_overlay_element import DeveloperOverlayElement
+from .base_element import BaseElement
 from typing import Callable, TYPE_CHECKING, Optional
 if TYPE_CHECKING:
     from anaconsole.dev_overlay import DeveloperOverlay
 
 
-class Checkbox(DeveloperOverlayElement):
+class Checkbox(BaseElement):
     INSET: bool = True
     SIZE = 18
     CHECK_IMAGE: pg.Surface = pg.image.load(load_file_stream("check.png"))
 
-    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["DeveloperOverlayElement"],
+    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["BaseElement"],
                  position: tuple[int, int],
                  callback: Callable[[bool], None],
                  getter: Callable[[], bool] | None = None

@@ -7,7 +7,7 @@ from itertools import islice
 import types
 import sys
 from collections import deque
-from anaconsole.dev_overlay_element import DeveloperOverlayElement
+from .base_element import BaseElement
 from .button import Button
 from .input_box import InputBox, Autocomplete
 from .variable_monitor import VariableMonitorWindow
@@ -94,7 +94,7 @@ class Logger:
         surface.blit(self.surface, (0, surface.get_height() - self.surface.get_height()))
 
 
-class DeveloperConsole(DeveloperOverlayElement):
+class DeveloperConsole(BaseElement):
     DEFAULT_HEIGHT = 200
     SUBMIT_BUTTON_WIDTH = 50
 
@@ -462,8 +462,8 @@ class DeveloperConsole(DeveloperOverlayElement):
         self.render_border()
 
 
-class Log(DeveloperOverlayElement):
-    def __init__(self, overlay: "DeveloperOverlay", parent: "DeveloperOverlayElement", rect: pg.Rect):
+class Log(BaseElement):
+    def __init__(self, overlay: "DeveloperOverlay", parent: "BaseElement", rect: pg.Rect):
         super().__init__(overlay, parent, rect)
         self.surface.fill(overlay.SECONDARY_COLOR)
 

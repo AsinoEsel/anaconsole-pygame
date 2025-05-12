@@ -3,7 +3,7 @@ import numpy as np
 import colorsys
 import math
 from anaconsole.assets import load_file_stream
-from anaconsole.dev_overlay_element import DeveloperOverlayElement
+from .base_element import BaseElement
 from .slider import Slider
 from .button import Button
 from .window import Window
@@ -33,8 +33,8 @@ def generate_color_wheel(size: int) -> pg.Surface:
     return surface
 
 
-class ColorPicker(DeveloperOverlayElement):
-    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["DeveloperOverlayElement"], rect: pg.Rect,
+class ColorPicker(BaseElement):
+    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["BaseElement"], rect: pg.Rect,
                  getter: Callable[[], tuple[int, int, int]] = lambda: (0, 0, 0),
                  setter: Callable[[tuple[int, int, int]], None] = lambda color: None,
                  ):
@@ -128,13 +128,13 @@ class ColorPicker(DeveloperOverlayElement):
         return setter
 
 
-class ColorWheel(DeveloperOverlayElement):
+class ColorWheel(BaseElement):
     SIZE = 200
     WHEEL_SIZE = SIZE
     COLOR_PICKER_CARET: pg.Surface = pg.image.load(load_file_stream("color_picker_caret.png"))
     COLOR_WHEEL: pg.Surface = generate_color_wheel(SIZE)
 
-    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["DeveloperOverlayElement"], pos: tuple[int, int],
+    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["BaseElement"], pos: tuple[int, int],
                  getter: Callable[[], tuple[int, int, int]] = lambda: (0, 0, 0),
                  setter: Callable[[tuple[int, int, int]], None] = lambda color: None,
                  ):
@@ -201,7 +201,7 @@ class ColorPickerWindow(Window):
     SIZE: tuple[int, int] = (400, 250)
     CONFIRM_BUTTON_SIZE: tuple[int, int] = (60, 20)
 
-    def __init__(self, overlay: "DeveloperOverlay", parent: "DeveloperOverlayElement", position: tuple[int, int],
+    def __init__(self, overlay: "DeveloperOverlay", parent: "BaseElement", position: tuple[int, int],
                  getter: Callable[[], tuple[int, int, int]] = lambda: (0, 0, 0),
                  setter: Callable[[tuple[int, int, int]], None] = lambda color: None,
                  ):
@@ -215,7 +215,7 @@ class ColorPickerWindow(Window):
 
 
 class ColorButton(Button):
-    def __init__(self, overlay: "DeveloperOverlay", parent: "DeveloperOverlayElement", rect: pg.Rect,
+    def __init__(self, overlay: "DeveloperOverlay", parent: "BaseElement", rect: pg.Rect,
                  getter: Callable[[], tuple[int, int, int]] = lambda: (0, 0, 0),
                  setter: Callable[[tuple[int, int, int]], None] = lambda color: None,
                  ):

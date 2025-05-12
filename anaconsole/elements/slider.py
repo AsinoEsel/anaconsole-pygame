@@ -1,17 +1,17 @@
 import pygame as pg
 from typing import Type, Union, TYPE_CHECKING, Optional, Callable
-from anaconsole.dev_overlay_element import DeveloperOverlayElement
+from .base_element import BaseElement
 if TYPE_CHECKING:
     from anaconsole.dev_overlay import DeveloperOverlay
 
 
-class Slider(DeveloperOverlayElement):
+class Slider(BaseElement):
     COLOR: tuple[int, int, int] = (31, 31, 31)
     GROOVE_WIDTH: int = 6
     SLIDER_SIZE: tuple[int, int] = (12, 24)
     TRANSPARENCY: tuple[int, int, int] = (0, 0, 0)
 
-    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["DeveloperOverlayElement"], rect: pg.Rect,
+    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["BaseElement"], rect: pg.Rect,
                  domain: Type[Union[int, float]],
                  value_range: tuple[int | float, int | float],
                  getter: Callable[[], int | float],

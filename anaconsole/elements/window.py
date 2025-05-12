@@ -1,18 +1,18 @@
 import pygame as pg
 from anaconsole.assets import load_file_stream
-from anaconsole.dev_overlay_element import DeveloperOverlayElement
+from .base_element import BaseElement
 from .button import Button
 from typing import TYPE_CHECKING, Optional
 if TYPE_CHECKING:
     from anaconsole.dev_overlay import DeveloperOverlay
 
 
-class Window(DeveloperOverlayElement):
+class Window(BaseElement):
     CLOSE_BUTTON_IMAGE: pg.Surface = pg.image.load(load_file_stream("x.png"))
     PIN_BUTTON_IMAGE: pg.Surface = pg.image.load(load_file_stream("pin.png"))
     BUTTON_SIZE: int = 14
 
-    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["DeveloperOverlayElement"], rect: pg.Rect, title: str):
+    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["BaseElement"], rect: pg.Rect, title: str):
         super().__init__(overlay, parent, rect)
         self.title: str = title
         close_button: Button = Button(overlay, self,
