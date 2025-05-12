@@ -6,7 +6,7 @@ from .elements.dev_console import DeveloperConsole, Logger, OutputRedirector
 from .elements import BaseElement
 from .elements.input_box import Autocomplete
 from .assets import load_file_stream
-from .mousemotion2 import MOUSEMOTION_2
+from anaconsole import MOUSEMOTION_2
 from collections import deque
 from time import perf_counter
 

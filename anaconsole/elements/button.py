@@ -1,7 +1,7 @@
 import pygame as pg
 from .base_element import BaseElement
 from typing import Callable, TYPE_CHECKING, Optional
-from anaconsole.mousemotion2 import MOUSEMOTION_2
+from anaconsole import MOUSEMOTION_2
 if TYPE_CHECKING:
     from anaconsole.dev_overlay import DeveloperOverlay
 
