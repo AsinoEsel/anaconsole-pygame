@@ -159,6 +159,8 @@ class DeveloperConsole(DeveloperOverlayElement):
             autocomplete_function: Callable[[str], list[str]] | None = getattr(command, "_autocomplete_function", None)
             if not autocomplete_function:
                 return 0, []
+
+            offset, options = 0, []
             for command_carrier in self.overlay.namespace.__dict__.values():
                 if getattr(command_carrier, autocomplete_function.__name__, None):
                     offset, options = getattr(command_carrier, autocomplete_function.__name__)(words[1])
@@ -172,12 +174,19 @@ class DeveloperConsole(DeveloperOverlayElement):
         for line in traceback.format_exc().split("\n"):
             self.log.print(line, color=self.overlay.ERROR_COLOR, mirror_to_stdout=True)
 
-    def exec_cfg_autocomplete(self, text: str) -> tuple[int, list["Autocomplete.Option"]]:
-        directory = Path.cwd() / "configs"
-        if not directory.exists():
-            return 0, [Autocomplete.Option("", f"No configs/ directory was found.")]
-        files = [f.name for f in Path(directory).iterdir() if f.is_file() and f.name.startswith(text) and f.name != text]
-        return 0, list(Autocomplete.Option(file, "") for file in files)
+    @staticmethod
+    def exec_cfg_autocomplete(text: str) -> tuple[int, list["Autocomplete.Option"]]:
+        userpath: list[str] = text.split("/")
+        position = text.rfind("/") + 1 if text.rfind("/") != -1 else 0
+        path = Path.cwd() / Path(*userpath)
+        if not path.exists():
+            path = Path.cwd() / Path(*userpath[:-1])
+        if not path.exists():
+            return 0, []
+        if not path.is_dir():
+            return 0, []
+        names = [f.name + '/' if f.is_dir() else f.name for f in path.iterdir() if f.name.startswith(userpath[-1])]
+        return position, [Autocomplete.Option(name, "") for name in names]
 
     @console_command("developer", hint=lambda self: int(self.overlay._developer_mode))
     def set_developer_mode(self, enable: int):
@@ -191,18 +200,17 @@ class DeveloperConsole(DeveloperOverlayElement):
 
     @console_command("var_monitor", is_cheat_protected=True)
     def open_variable_monitor_window(self):
+        """Open the variable monitor window"""
         self.overlay.children.append(VariableMonitorWindow(self.overlay, self.overlay, pg.Rect((200, 200), VariableMonitorWindow.SIZE)))
 
     @console_command(autocomplete_function=exec_cfg_autocomplete, is_cheat_protected=True)
-    def exec_cfg(self, config: str) -> None:
-        """Executes any file containing python code in the configs/ directory"""
-        if not config.endswith(".cfg"):
-            config += ".cfg"
-        filename = Path.cwd() / "configs" / config
-        if not filename.exists():
-            print(f"Config {config} does not exist.")
+    def exec_cfg(self, filepath: str) -> None:
+        """Executes any file containing python code"""
+        path = Path.cwd() / filepath
+        if not path.exists():
+            print(f"Config {filepath} does not exist.")
             return
-        with open(filename, 'r') as file:
+        with open(path, 'r') as file:
             code = file.read()
             try:
                 exec(code, None, self.overlay.namespace.__dict__)
@@ -420,6 +428,7 @@ class DeveloperConsole(DeveloperOverlayElement):
         old_height = self.surface.get_height()
         new_height = min(self.overlay.surface.get_height(), max(self.input_box.surface.get_height() + 2 * self.overlay.border_offset, new_height))
         diff = new_height - old_height
+        self.rect.h = new_height
         for child in self.children:
             child.rect.move_ip(0, diff)
         self.surface = pg.Surface((self.surface.get_width(), new_height))
