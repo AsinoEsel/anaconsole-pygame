@@ -43,7 +43,7 @@ class Autocomplete(BaseElement):
     def draw(self):
         surface_border_width = 2
         hint_gap = 1 if any(option.type_hint for option in self.options) else 0
-        surface_width = max(len(option.name) + min(self.MAX_HINT_LENGTH, len(option.type_hint)) + hint_gap for option in self.options) * self.overlay.char_width + 2 * surface_border_width
+        surface_width = max(len(option.name.rstrip()) + min(self.MAX_HINT_LENGTH, len(option.type_hint)) + hint_gap for option in self.options) * self.overlay.char_width + 2 * surface_border_width
         surface_height = len(self.options) * self.overlay.char_height + surface_border_width
 
         self.surface = pg.Surface((surface_width, surface_height))
