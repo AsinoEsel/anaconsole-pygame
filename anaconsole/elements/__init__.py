@@ -1,4 +1,5 @@
 from .base_element import BaseElement
+from .autocomplete import Autocomplete
 from .button import Button
 from .checkbox import Checkbox
 from .color_picker import ColorButton

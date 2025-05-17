@@ -3,8 +3,7 @@ import sys
 from typing import Any
 from types import SimpleNamespace
 from .elements.dev_console import DeveloperConsole, Logger, OutputRedirector
-from .elements import BaseElement
-from .elements.input_box import Autocomplete
+from .elements import BaseElement, Autocomplete
 from .assets import load_file_stream
 from anaconsole import MOUSEMOTION_2
 from collections import deque

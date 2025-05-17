@@ -1,3 +1,4 @@
+import shlex
 import time
 import pygame as pg
 import os
@@ -8,8 +9,9 @@ import types
 import sys
 from collections import deque
 from .base_element import BaseElement
+from .autocomplete import Autocomplete
 from .button import Button
-from .input_box import InputBox, Autocomplete
+from .input_box import InputBox
 from .variable_monitor import VariableMonitorWindow
 from pathlib import Path
 import traceback
@@ -360,12 +362,19 @@ class DeveloperConsole(BaseElement):
         """Toggles the developer console"""
         self.overlay.open = not self.overlay.open
 
-    def handle_command(self, command: str, *, suppress_logging: bool = False, ignore_cheat_protection: bool = False):
-        if not command:
+    def handle_command(self, user_input: str, *, suppress_logging: bool = False, ignore_cheat_protection: bool = False):
+        if not user_input:
             return
+
         if not suppress_logging:
-            self.log.print(">>> " + command, color=self.overlay.PRIMARY_TEXT_COLOR, mirror_to_stdout=True)
-        command_name, *args = command.split()
+            self.log.print(">>> " + user_input, color=self.overlay.PRIMARY_TEXT_COLOR, mirror_to_stdout=True)
+
+        try:
+            command_name, *args = shlex.split(user_input)
+        except ValueError:
+            self.log.print("Failed to parse string, mismatched quotation marks?", color=self.overlay.ERROR_COLOR, mirror_to_stdout=True)
+            return
+
         func = self.get_all_commands().get(command_name)
         if func is None:
             self.log.print(f"No command {command_name} exists in the current game.", color=self.overlay.ERROR_COLOR, mirror_to_stdout=True)
@@ -373,6 +382,7 @@ class DeveloperConsole(BaseElement):
         if getattr(func, "_is_cheat_protected", False) and not self.overlay.cheats_enabled and not ignore_cheat_protection:
             self.log.print(f"The command {command_name} is cheat protected.", color=self.overlay.HIGHLIGHT_COLOR, mirror_to_stdout=True)
             return
+
         try:
             cast_args = []
             for arg, (param_name, param) in zip(args, inspect.signature(func).parameters.items()):
