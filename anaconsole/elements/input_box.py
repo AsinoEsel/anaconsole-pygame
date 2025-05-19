@@ -4,11 +4,19 @@ from .base_element import BaseElement
 from typing import Callable, TYPE_CHECKING, Literal
 if TYPE_CHECKING:
     from anaconsole.dev_overlay import DeveloperOverlay
+    from .autocomplete import Autocomplete
 
 
 class InputBox(BaseElement):
     INSET: bool = True
     STOP_CHARS: tuple[str] = (' ', '.', ',')
+    PAIRED_DELIMITERS: dict[str:str] = {
+        '"': '"',
+        "'": "'",
+        "(": ")",
+        "[": "]",
+        "{": "}",
+    }
 
     def __init__(self, overlay: "DeveloperOverlay", parent: "BaseElement", rect: pg.Rect,
                  getter: Callable[[], str] | None = None,
@@ -57,6 +65,15 @@ class InputBox(BaseElement):
         elif event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE and self.in_edit_mode:
             self.escape()
         elif event.type == pg.TEXTINPUT and self.in_edit_mode and (len(self.text) < self.max_chars or self.selection_range):
+            if event.text in self.PAIRED_DELIMITERS.keys() and self.selection_range:
+                self.text = (self.text[:min(self.selection_range)]
+                             + event.text
+                             + self.text[min(self.selection_range):max(self.selection_range)]
+                             + self.PAIRED_DELIMITERS[event.text]
+                             + self.text[max(self.selection_range):]
+                             )
+                self.selection_range = (self.selection_range[0] + 1, self.selection_range[1] + 1)
+                return True
             self.in_history = False
             if self.selection_range:
                 self.erase_selection_range()

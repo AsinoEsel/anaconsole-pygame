@@ -1,13 +1,14 @@
 import shlex
 import time
 import pygame as pg
+import pygame.locals
 import os
 import inspect
 from typing import get_type_hints, TYPE_CHECKING, Callable, Any
 from itertools import islice
 import types
 import sys
-from collections import deque
+from collections import deque, defaultdict
 from .base_element import BaseElement
 from .autocomplete import Autocomplete
 from .button import Button
@@ -99,16 +100,17 @@ class Logger:
 class DeveloperConsole(BaseElement):
     DEFAULT_HEIGHT = 200
     SUBMIT_BUTTON_WIDTH = 50
+    KEY_MAPPING: dict[str, int] = {name.removeprefix("K_"): getattr(pygame.locals, name) for name in dir(pg.locals) if name.startswith('K_')}
+    INVERT_KEY_MAPPING: dict[int, str] = {value: key for key, value in KEY_MAPPING.items()}
 
     def __init__(self, overlay: "DeveloperOverlay"):
         super().__init__(overlay, overlay, pg.Rect(0, 0, overlay.rect.w, self.DEFAULT_HEIGHT))
-
+        self.keybinds: dict[str|int, list[str]] = defaultdict(list)
         input_box_height = int(overlay.char_height * 1.5)
         log_width = overlay.rect.w - 2 * overlay.border_offset
         input_box_width = log_width - overlay.border_offset - self.SUBMIT_BUTTON_WIDTH
         max_log_height = overlay.rect.w - input_box_height - 3 * overlay.border_offset
 
-        # self.autocomplete = Autocomplete(overlay, (0, 0))
         self.input_box = InputBox(overlay, self, pg.Rect(self.overlay.border_offset,
                                                          self.surface.get_height() - input_box_height - self.overlay.border_offset,
                                                          input_box_width,
@@ -131,7 +133,6 @@ class DeveloperConsole(BaseElement):
         self.children.append(self.input_box)
         self.children.append(submit_button)
 
-        # self._namespace: types.SimpleNamespace = self._setup_namespace()  # Used for exec and eval commands
 
     def dev_console_autocomplete(self, text: str) -> tuple[int, list["Autocomplete.Option"]]:
         if not text:
@@ -357,23 +358,69 @@ class DeveloperConsole(BaseElement):
         except Exception as e:
             self.print_exception_to_log(e)
 
+    def bind_autocomplete(self, text: str) -> tuple[int, list["Autocomplete.Option"]]:
+        parts = text.split()
+        space = text.endswith(" ")
+
+        if not parts:
+            return 0, [Autocomplete.Option(k + " ", "") for k in self.KEY_MAPPING]
+
+        if len(parts) == 1 and not space:
+            return 0, [Autocomplete.Option(k + " ", "") for k in self.KEY_MAPPING if k.startswith(parts[0])]
+
+        pos = len(parts[0]) + 1
+        prefix = parts[-1] if not space else ""
+
+        options = [Autocomplete.Option(c, "") for c in self.get_all_commands() if c.startswith(prefix) and c != prefix]
+        return pos, options
+
+    @console_command("bind", autocomplete_function=bind_autocomplete)
+    def bind_command(self, key: str, command: str = None) -> None:
+        key_constant: int | None = self.KEY_MAPPING.get(key)
+        if key_constant is None:
+            self.log.print(f"{key} is an invalid key", color=self.overlay.ERROR_COLOR, mirror_to_stdout=True)
+            return
+
+        if command is None:
+            bound_commands: list[str] = self.keybinds.get(key_constant, [])
+            if not bound_commands:
+                self.log.print(f"No commands bound to {key}", mirror_to_stdout=True)
+            else:
+                self.log.print(f"bind {key} {"; ".join(
+                    ['"' + command + '"' if " " in command else command for command in bound_commands]
+                )}", mirror_to_stdout=True)
+            return
+
+        self.keybinds[key_constant].append(command)
+
+    def unbind_autocomplete(self, text: str) -> tuple[int, list["Autocomplete.Option"]]:
+        return 0, [Autocomplete.Option(self.INVERT_KEY_MAPPING[key], "; ".join(commands)) for key, commands in self.keybinds.items() if self.INVERT_KEY_MAPPING[key].startswith(text)]
+
+    @console_command("unbind", autocomplete_function=unbind_autocomplete)
+    def unbind_command(self, key: str):
+        key_constant: int | None = self.KEY_MAPPING.get(key)
+        if key_constant is None:
+            self.log.print(f"{key} is an invalid key", color=self.overlay.ERROR_COLOR, mirror_to_stdout=True)
+            return
+
+        if not self.keybinds.get(key_constant):
+            return
+
+        self.keybinds.pop(key_constant)
+
     @console_command("toggleconsole")
     def toggle_dev_console(self):
         """Toggles the developer console"""
         self.overlay.open = not self.overlay.open
 
     def handle_command(self, user_input: str, *, suppress_logging: bool = False, ignore_cheat_protection: bool = False):
-        if not user_input:
+        if not user_input or user_input.isspace():
             return
 
         if not suppress_logging:
             self.log.print(">>> " + user_input, color=self.overlay.PRIMARY_TEXT_COLOR, mirror_to_stdout=True)
 
-        try:
-            command_name, *args = shlex.split(user_input)
-        except ValueError:
-            self.log.print("Failed to parse string, mismatched quotation marks?", color=self.overlay.ERROR_COLOR, mirror_to_stdout=True)
-            return
+        command_name, *args = shlex.split(user_input)
 
         func = self.get_all_commands().get(command_name)
         if func is None:
@@ -444,6 +491,11 @@ class DeveloperConsole(BaseElement):
         self.surface = pg.Surface((self.surface.get_width(), new_height))
 
     def handle_event(self, event: pg.event.Event) -> bool:
+        if event.type == pg.KEYDOWN:
+            commands: list[str] | None = self.keybinds.get(event.key)
+            if commands:
+                for command in commands:
+                    self.handle_command(command, suppress_logging=True)
         if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             self.toggle_dev_console()
         elif event.type == pg.KEYDOWN and (event.key == 1073741921 or event.key == pg.K_PAGEUP):
