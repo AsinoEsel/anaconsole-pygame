@@ -55,7 +55,12 @@ class DeveloperOverlay(BaseElement):
         self._frame_time_buffer_length: int = max(1, int(self._frame_time_buffer_time_seconds * self._target_framerate)) if self._target_framerate is not None else 100
         self._frame_times_ms: deque[int] = deque(maxlen=self._frame_time_buffer_length)
 
-        self.namespace = SimpleNamespace(dev_console=self.dev_console, pg=pg, **namespaces if namespaces else dict())
+        self.namespace = SimpleNamespace(
+            dev_console=self.dev_console,
+            main=sys.modules["__main__"],
+            pg=pg,
+            **namespaces if namespaces else dict(),
+        )
         sys.stdout = OutputRedirector(self.dev_console.log.print, self._logger.print)
 
     def handle_event(self, event: pg.event.Event) -> bool:
