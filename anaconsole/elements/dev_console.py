@@ -416,6 +416,11 @@ class DeveloperConsole(BaseElement):
         """Toggles the developer console"""
         self.overlay.open = not self.overlay.open
 
+    @console_command
+    def restart(self):
+        """Attempts to restart the script with the same parameters as before"""
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+
     def handle_command(self, user_input: str, *, suppress_logging: bool = False, ignore_cheat_protection: bool = False):
         if not user_input or user_input.isspace():
             return
