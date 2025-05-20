@@ -374,6 +374,10 @@ class DeveloperConsole(BaseElement):
         options = [Autocomplete.Option(c, "") for c in self.get_all_commands() if c.startswith(prefix) and c != prefix]
         return pos, options
 
+    @staticmethod
+    def get_bound_commands_string(bound_commands: list[str]) -> str:
+        return "; ".join(['"' + command + '"' if " " in command else command for command in bound_commands])
+
     @console_command("bind", autocomplete_function=bind_autocomplete)
     def bind_command(self, key: str, command: str = None) -> None:
         key_constant: int | None = self.KEY_MAPPING.get(key)
@@ -386,15 +390,13 @@ class DeveloperConsole(BaseElement):
             if not bound_commands:
                 self.log.print(f"No commands bound to {key}", mirror_to_stdout=True)
             else:
-                self.log.print(f"bind {key} {"; ".join(
-                    ['"' + command + '"' if " " in command else command for command in bound_commands]
-                )}", mirror_to_stdout=True)
+                self.log.print(f"bind {key} {self.get_bound_commands_string(bound_commands)}", mirror_to_stdout=True)
             return
 
         self.keybinds[key_constant].append(command)
 
     def unbind_autocomplete(self, text: str) -> tuple[int, list["Autocomplete.Option"]]:
-        return 0, [Autocomplete.Option(self.INVERT_KEY_MAPPING[key], "; ".join(commands)) for key, commands in self.keybinds.items() if self.INVERT_KEY_MAPPING[key].startswith(text)]
+        return 0, [Autocomplete.Option(self.INVERT_KEY_MAPPING[key], self.get_bound_commands_string(commands)) for key, commands in self.keybinds.items() if self.INVERT_KEY_MAPPING[key].startswith(text)]
 
     @console_command("unbind", autocomplete_function=unbind_autocomplete)
     def unbind_command(self, key: str):
