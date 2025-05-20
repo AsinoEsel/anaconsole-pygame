@@ -107,6 +107,7 @@ class BaseElement:
                     self.parent.select_next()
                     return
                 index = 0
+            self.selected_child._trickle_down_deselect()
             self.selected_child = self.children[index]
             self.selected_child.selected_child = None
 
@@ -116,26 +117,43 @@ class BaseElement:
             current = current.selected_child
         return current if current is not self else None
 
-    def handle_event_recursively(self, event: pg.event.Event):
-        if hasattr(event, "pos"):
+    def deselect(self):
+        pass
+
+    def _trickle_down_deselect(self) -> None:
+        self.deselect()
+        if self.selected_child:
+            self.selected_child.deselect()
+
+    @staticmethod
+    def is_mouse_event(event: pg.event.Event) -> bool:
+        return hasattr(event, "pos")
+
+    def _trickle_down_event(self, event: pg.event.Event) -> bool:
+        # If the event is a mouse event, we correct the position tuple to be relative to our rect
+        if self.is_mouse_event(event):
             event.pos = (event.pos[0] - self.rect.left, event.pos[1] - self.rect.top)
 
+        # We first handle the event ourselves. If it gets processed, we stop the trickle here.
         if self.handle_event(event):
-            return True  # eaten by itself
+            return True
 
-        for child in self.children:
-            if hasattr(event, "pos") and not child.rect.collidepoint(event.pos):
-                continue
-            if event.type == pg.MOUSEBUTTONDOWN:  # TODO: child selection
-                self.selected_child = child
-            if child.handle_event_recursively(event):
-                return True  # eaten by child
+        # Child selection logic happens here. If LMB is pressed, we iterate over all children and perform collision
+        # checks. If a child is found, we mark it as selected and deselect the previously selected child.
+        if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+            found_child: BaseElement | None = None
+            for child in self.children:
+                if child.rect.collidepoint(event.pos):
+                    found_child = child
+                    break
+            if found_child is not self.selected_child:
+                if self.selected_child is not None:
+                    self.selected_child._trickle_down_deselect()
+                self.selected_child = found_child
 
-        if event.type == pg.MOUSEBUTTONDOWN and not any(child.rect.collidepoint(event.pos) for child in self.children):
-            self.selected_child = None
-
-        if hasattr(event, "pos"):
-            event.pos = (event.pos[0] + self.rect.left, event.pos[1] + self.rect.top)
+        # We finally trickle the event down to our selected child.
+        if self.selected_child:
+            return self.selected_child._trickle_down_event(event)
         return False
 
     def handle_event(self, event: pg.event.Event) -> bool:

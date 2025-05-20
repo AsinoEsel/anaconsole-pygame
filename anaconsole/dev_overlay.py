@@ -63,61 +63,38 @@ class DeveloperOverlay(BaseElement):
             self.open = not self.open
             return True
 
-        if not self.open and not any(getattr(child, "pinned", False) for child in self.children):
-            return False
+        # Handle keybinds if not open. TODO: abtract into DeveloperConsole method?
+        if event.type == pg.KEYDOWN and not self.open:
+            commands: list[str] | None = self.dev_console.keybinds.get(event.key)
+            if commands:
+                for command in commands:
+                    self.dev_console.handle_command(command, suppress_logging=True)
 
-        # TODO: LOTS of shared code with DevOverlayElement.handle_event_recursively. Merge?
-        # First, we check if the autocomplete is open. If it is, it has absolute priority.
+        # Check if the autocomplete is open. If it is, it has priority over other elements.
         if self.autocomplete.show:
             if self.autocomplete.handle_event(event):
                 return True
 
+        # Do tabbing logic
         if event.type == pg.KEYDOWN and event.key == pg.K_TAB:
-            if not self.get_selected_element():
+            if self.selected_child is None:
                 self.selected_child = self.children[0]
                 return True
             self.get_selected_element().select_next()
             return True
 
-        # If it's a MOUSEMOTION event, we immediately fire our own MOUSEMOTION_2 event.
-        # This makes it so that elements are notified when the cursor moves away from them.
+        # Lastly, if the event is a MOUSEMOTION event, we immediately fire our own self-made MOUSEMOTION_2 event.
+        # This makes it so that elements can be notified when the cursor moves away from them. Very cursed code block.
         if event.type == pg.MOUSEMOTION:
             mouse_motion2 = pg.event.Event(MOUSEMOTION_2, event.dict.copy())
             mouse_motion2.pos = (event.pos[0] - event.rel[0], event.pos[1] - event.rel[1])
             for child in self.children:
                 if not child.rect.collidepoint(mouse_motion2.pos):
                     continue
-                if child.handle_event_recursively(mouse_motion2):
+                if child._trickle_down_event(mouse_motion2):
                     break
 
-        # We prioritize the selected element if it exists.
-        if event.type != pg.MOUSEBUTTONDOWN and self.get_selected_element():
-            event_copy = pg.event.Event(event.type, event.dict)
-
-            if hasattr(event, "pos"):
-                current = self
-                while current != self.get_selected_element():
-                    current = current.selected_child
-                    event_copy.pos = (event.pos[0] - current.rect.left, event.pos[1] - current.rect.top)
-
-            if self.get_selected_element().handle_event(event_copy):
-                return True
-
-        # We finally propagate the event normally down the tree
-        for child in self.children:
-            if hasattr(event, "pos") and not child.rect.collidepoint(event.pos):
-                continue
-            if event.type == pg.MOUSEBUTTONDOWN:
-                self.selected_child = child
-            if child.handle_event_recursively(event):
-                return True
-
-        # Deselection in case nothing was clicked on
-        if event.type == pg.MOUSEBUTTONDOWN and not any(child.rect.collidepoint(event.pos) for child in self.children):
-            self.selected_child = None
-            return True
-
-        return True if self.open else False
+        return False
 
     def get_fps_color(self, fps: float) -> tuple[int, int, int]:
         if self._target_framerate is None:
@@ -163,9 +140,6 @@ class DeveloperOverlay(BaseElement):
             if self._developer_mode:  # todo: duplicate code
                 self._logger.render(self.surface)
             if self._show_fps:
-                # if self._frame_times_ms.maxlen != max(1, int(self._target_framerate * self._frame_time_buffer_time_seconds)):
-                #     self._frame_times_ms = deque(
-                #         maxlen=max(1, int(self._target_framerate * self._frame_time_buffer_time_seconds)))
                 self.draw_fps_counter(self.surface)
             return
 
@@ -182,8 +156,8 @@ class DeveloperOverlay(BaseElement):
             self.surface.blit(self.autocomplete.surface, (self.autocomplete.rect.left + self.autocomplete.input_box.get_letter_x(self.autocomplete.position),
                                                      self.autocomplete.rect.top))
 
-        if self.get_selected_element():
-            pg.draw.rect(self.surface, (255, 255, 255), self.get_selected_element().get_absolute_rect(), 2)
+        # if self.get_selected_element():
+        #     pg.draw.rect(self.surface, (255, 255, 255), self.get_selected_element().get_absolute_rect(), 2)
 
         if self._show_fps:
             self.draw_fps_counter(self.surface)

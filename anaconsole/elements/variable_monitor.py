@@ -96,6 +96,7 @@ class VariableMonitor(BaseElement):
     def new_var_button_callback(self) -> None:
         if self.new_var_button.children:
             return
+        self.new_var_button.locked = True
         var_name_input_box = InputBox(self.overlay, self.new_var_button,
                                       pg.Rect(0 + self.overlay.border_offset,
                                               0 + self.overlay.border_offset,
@@ -123,6 +124,7 @@ class VariableMonitor(BaseElement):
         obj = eval(object_name, None, self.overlay.namespace.__dict__)
         self.register_variable(obj, attr, attr)
         self.new_var_button.children.clear()
+        self.new_var_button.locked = False
 
     def register_variable(self, obj: object, attr: str, name: str = None, **kwargs: dict[str:Any]):
         rect = pg.Rect(0, (len(self.children) - 1) * self.variable_height, self.rect.w, self.variable_height)

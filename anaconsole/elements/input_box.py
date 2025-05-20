@@ -246,6 +246,9 @@ class InputBox(BaseElement):
         h = self.rect.height - 2 * self.overlay.char_height // 8
         pg.draw.rect(self.surface, self.overlay.HIGHLIGHT_COLOR, (x, y, w, h))
 
+    def deselect(self) -> None:
+        self.in_edit_mode = False
+
     def render_body(self):
         fill_color = self.overlay.PRIMARY_COLOR if not self.in_edit_mode else self.overlay.SECONDARY_COLOR
         self.surface.fill(fill_color)

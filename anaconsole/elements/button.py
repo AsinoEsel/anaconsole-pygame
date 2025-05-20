@@ -7,7 +7,11 @@ if TYPE_CHECKING:
 
 
 class Button(BaseElement):
-    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["BaseElement"], rect: pg.Rect, callback: Callable[[], None], *, image: pg.Surface | None = None, toggle: bool = False):
+    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["BaseElement"], rect: pg.Rect, callback: Callable[[], None], *,
+                 image: pg.Surface | None = None,
+                 toggle: bool = False,
+                 locked: bool = False,
+                 ):
         super().__init__(overlay, parent, rect)
         self.callback: Callable[[], None] = callback
         self.image: pg.Surface | None = image
@@ -16,6 +20,7 @@ class Button(BaseElement):
             self.state: bool = False
         self.highlighted: bool = False
         self.pressed: bool = False
+        self.locked: bool = locked
 
     def render_body(self):
         self.surface.fill(self.overlay.PRIMARY_COLOR)
@@ -32,7 +37,7 @@ class Button(BaseElement):
         self.render_body()
         self.render_border(inset=self.pressed)
 
-    def push_button(self):
+    def trigger(self):
         self.pressed = False
         if self.toggle:
             self.state = not self.state
@@ -40,7 +45,7 @@ class Button(BaseElement):
 
     def handle_event(self, event: pg.event.Event) -> bool:
         if event.type == pg.MOUSEMOTION:
-            if self.is_selected() and pg.mouse.get_pressed()[0] and 0 < event.pos[0] < self.rect.w and 0 < event.pos[1] < self.rect.h:
+            if self.is_selected() and pg.mouse.get_pressed()[0] and 0 < event.pos[0] < self.rect.w and 0 < event.pos[1] < self.rect.h and not self.locked:
                 self.pressed = True
             self.highlighted = True
             return True
@@ -50,15 +55,15 @@ class Button(BaseElement):
                 self.highlighted = False
                 self.render()
                 return True
-        elif event.type == pg.MOUSEBUTTONDOWN:
+        elif event.type == pg.MOUSEBUTTONDOWN and not self.locked:
             self.pressed = True
-        elif event.type == pg.MOUSEBUTTONUP and self.is_selected() and 0 < event.pos[0] < self.rect.w and 0 < event.pos[1] < self.rect.h:
-            self.push_button()
+        elif event.type == pg.MOUSEBUTTONUP and self.is_selected() and 0 < event.pos[0] < self.rect.w and 0 < event.pos[1] < self.rect.h and not self.locked:
+            self.trigger()
             return True
-        elif event.type == pg.KEYDOWN and (event.key == pg.K_RETURN or event.key == pg.K_SPACE):
+        elif event.type == pg.KEYDOWN and (event.key == pg.K_RETURN or event.key == pg.K_SPACE) and not self.locked:
             self.pressed = True
             return True
-        elif event.type == pg.KEYUP and (event.key == pg.K_RETURN or event.key == pg.K_SPACE):
-            self.push_button()
+        elif event.type == pg.KEYUP and (event.key == pg.K_RETURN or event.key == pg.K_SPACE) and not self.locked:
+            self.trigger()
             return True
         return False

@@ -189,6 +189,7 @@ class DeveloperConsole(BaseElement):
         if not path.is_dir():
             return 0, []
         names = [f.name + '/' if f.is_dir() else f.name for f in path.iterdir() if f.name.startswith(userpath[-1])]
+        names.append("../")
         return position, [Autocomplete.Option(name, "") for name in names]
 
     @console_command("developer", hint=lambda self: int(self.overlay._developer_mode))
@@ -493,11 +494,6 @@ class DeveloperConsole(BaseElement):
         self.surface = pg.Surface((self.surface.get_width(), new_height))
 
     def handle_event(self, event: pg.event.Event) -> bool:
-        if event.type == pg.KEYDOWN:
-            commands: list[str] | None = self.keybinds.get(event.key)
-            if commands:
-                for command in commands:
-                    self.handle_command(command, suppress_logging=True)
         if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             self.toggle_dev_console()
         elif event.type == pg.KEYDOWN and (event.key == 1073741921 or event.key == pg.K_PAGEUP):
@@ -508,8 +504,6 @@ class DeveloperConsole(BaseElement):
             self.log.history_index -= event.y
             self.log.history_index = max(0, min(self.log.history_index, len(self.log.history)-1))
             self.log.render()
-        elif self.input_box.handle_event(event):
-            pass  # event got eaten by input box
         else:
             return False
         return True
