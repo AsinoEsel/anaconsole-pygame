@@ -189,7 +189,7 @@ class DeveloperConsole(BaseElement):
         if not path.is_dir():
             return 0, []
         names = [f.name + '/' if f.is_dir() else f.name for f in path.iterdir() if f.name.startswith(userpath[-1])]
-        names.append("../")
+        if "../".startswith(userpath[-1]): names.append("../")
         return position, [Autocomplete.Option(name, "") for name in names]
 
     @console_command("developer", hint=lambda self: int(self.overlay._developer_mode))
