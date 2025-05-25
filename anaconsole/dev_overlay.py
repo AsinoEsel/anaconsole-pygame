@@ -38,6 +38,7 @@ class DeveloperOverlay(BaseElement):
 
         self._logger = Logger(self.surface, font_override=logger_font_override)
         self.open: bool = False
+        self.in_tab_mode: bool = False
 
         self.char_width = self.font.render("A", False, (255, 255, 255)).get_width()
         self.char_height = self.font.get_height()
@@ -81,12 +82,16 @@ class DeveloperOverlay(BaseElement):
                 return True
 
         # Do tabbing logic
-        if event.type == pg.KEYDOWN and event.key == pg.K_TAB:
-            if self.selected_child is None:
-                self.selected_child = self.children[0]
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_TAB:
+                self.in_tab_mode = True
+                if self.selected_child is None:
+                    self.selected_child = self.children[0]
+                    return True
+                self.get_selected_element().select_next()
                 return True
-            self.get_selected_element().select_next()
-            return True
+            else:
+                self.in_tab_mode = False
 
         # Lastly, if the event is a MOUSEMOTION event, we immediately fire our own self-made MOUSEMOTION_2 event.
         # This makes it so that elements can be notified when the cursor moves away from them. Very cursed code block.
@@ -146,6 +151,11 @@ class DeveloperOverlay(BaseElement):
                 self._logger.render(self.surface)
             if self._show_fps:
                 self.draw_fps_counter(self.surface)
+            if self.autocomplete.show:
+                self.autocomplete.draw()
+                self.surface.blit(self.autocomplete.surface, (
+                self.autocomplete.rect.left + self.autocomplete.input_box.get_letter_x(self.autocomplete.position),
+                self.autocomplete.rect.top))
             return
 
         self.surface.fill(self.PRIMARY_COLOR, special_flags=pg.BLEND_RGB_MULT)
@@ -160,9 +170,6 @@ class DeveloperOverlay(BaseElement):
             self.autocomplete.draw()
             self.surface.blit(self.autocomplete.surface, (self.autocomplete.rect.left + self.autocomplete.input_box.get_letter_x(self.autocomplete.position),
                                                      self.autocomplete.rect.top))
-
-        # if self.get_selected_element():
-        #     pg.draw.rect(self.surface, (255, 255, 255), self.get_selected_element().get_absolute_rect(), 2)
 
         if self._show_fps:
             self.draw_fps_counter(self.surface)

@@ -75,6 +75,10 @@ class BaseElement:
         pg.draw.line(surface, secondary_color, (left, top + height), (left + width, top + height), 1)
 
     def render_border(self, inset: bool | None = None):
+        if self.overlay.in_tab_mode and self.is_selected():
+            pg.draw.rect(self.surface, (255, 255, 255), (0, 0, self.rect.w, self.rect.h), 1)
+            return
+
         inset: bool = inset if inset is not None else self.INSET
         # self.draw_border_rect(self.surface, self.rect, inset=inset)  # TODO: cannot use self.rect because of position offset
 
@@ -124,6 +128,13 @@ class BaseElement:
         self.deselect()
         if self.selected_child:
             self.selected_child.deselect()
+
+    def highlight_selected_element(self):
+        if self.selected_child:
+            if not self.selected_child.selected_child:
+                pg.draw.rect(self.surface, (255, 255, 255), self.selected_child.rect, 2)
+            else:
+                self.selected_child.highlight_selected_element()
 
     @staticmethod
     def is_mouse_event(event: pg.event.Event) -> bool:
