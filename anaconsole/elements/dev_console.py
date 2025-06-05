@@ -329,10 +329,14 @@ class DeveloperConsole(BaseElement):
 
                 options = []
                 for current_name in dir(current):
-                    obj = getattr(current, current_name)
-                    if not current_name.startswith(name) or current_name == name or current_name.startswith("__"):
+                    if current_name.startswith("_") and not text.rsplit(".", 1)[-1].startswith("_"):
                         continue
-                    if (str(obj).startswith("<") or str(obj).endswith(">")) and not callable(obj):
+                    if current_name.startswith("__") and not text.rsplit(".", 1)[-1].startswith("__"):
+                        continue
+                    if not current_name.startswith(name) or current_name == name:
+                        continue
+                    obj = getattr(current, current_name)
+                    if (str(obj).startswith("<") or str(obj).endswith(">")) and not callable(obj) or isinstance(obj, types.SimpleNamespace):
                         current_name += "."
                     if len(str(obj)) <= max(Autocomplete.MAX_UNSHORTENED_HINT_LENGTH, len(type(obj).__name__)):
                         hint: str = str(obj)
