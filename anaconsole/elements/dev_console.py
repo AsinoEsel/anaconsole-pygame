@@ -333,7 +333,7 @@ class DeveloperConsole(BaseElement):
                         continue
                     if current_name.startswith("__") and not text.rsplit(".", 1)[-1].startswith("__"):
                         continue
-                    if not current_name.startswith(name) or current_name == name:
+                    if name.lower() not in current_name.lower() or current_name == name:
                         continue
                     obj = getattr(current, current_name)
                     if (str(obj).startswith("<") or str(obj).endswith(">")) and not callable(obj) or isinstance(obj, types.SimpleNamespace):
