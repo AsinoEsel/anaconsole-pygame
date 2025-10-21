@@ -7,6 +7,7 @@ from .slider import Slider
 from .input_box import InputBox
 from .window import Window
 from .color_picker import ColorButton
+from .surface_inspector import SurfaceInspectorWindow
 from typing import Callable, TYPE_CHECKING, Optional, Any, get_type_hints, Type
 from types import MethodType
 if TYPE_CHECKING:
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class Variable(BaseElement):
-    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["BaseElement"], rect: pg.Rect,
+    def __init__(self, overlay: "DeveloperOverlay", parent: Optional[BaseElement], rect: pg.Rect,
                  var_name: str, var_type: type, var_getter: Callable[[], Any], var_setter: Callable[[Any], None], **kwargs):
         super().__init__(overlay, parent, rect)
         self.name: str = var_name
@@ -45,6 +46,15 @@ class Variable(BaseElement):
             self.children.append(Button(overlay, self, pg.Rect(self.rect.centerx, offset, self.rect.w//2-offset, height),
                                         callback=var_setter,
                                         image=overlay.font2.render(f"Run {var_setter.__name__}", False, overlay.PRIMARY_TEXT_COLOR, overlay.PRIMARY_COLOR)))
+        elif var_type is pg.Surface:
+            height: int = self.rect.h - 2 * self.overlay.border_offset
+            offset: int = (self.rect.h - height) // 2
+            self.children.append(
+                Button(overlay, self, pg.Rect(self.rect.centerx, offset, self.rect.w // 2 - offset, height),
+                       callback=lambda: overlay.children.append(SurfaceInspectorWindow(overlay, overlay, (200, 200), var_getter())),
+                       image=overlay.font2.render(f"Inspect surface", False, overlay.PRIMARY_TEXT_COLOR,
+                                                  overlay.PRIMARY_COLOR)))
+
         else:
             height: int = self.rect.h - 2 * self.overlay.border_offset
             offset: int = (self.rect.h - height) // 2

@@ -32,7 +32,7 @@ class Autocomplete(BaseElement):
         elif self.show and event.type == pg.KEYDOWN and event.key == pg.K_UP:
             self.selection_index = (self.selection_index - 1) % len(self.options)
             self.draw()
-        elif self.show and event.type == pg.KEYDOWN and event.key == pg.K_TAB:
+        elif self.show and event.type == pg.KEYDOWN and event.key == pg.K_TAB and self.input_box is not None:
             self.input_box.text = self.input_box.text[0:self.position] + self.options[self.selection_index].name
             self.input_box.caret_position = len(self.input_box.text)
             self.input_box.update_autocomplete(self.input_box.text)  # TODO: why do we need this?

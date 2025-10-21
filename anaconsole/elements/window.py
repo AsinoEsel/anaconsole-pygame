@@ -47,11 +47,8 @@ class Window(BaseElement):
         self.overlay.children.remove(self)
         del self
 
-    def render(self):
-        super().render()
-        self.render_header()
-
-    def render_header(self):
+    def render_body(self):
+        super().render_body()
         title_surface = self.overlay.font.render(self.title, False, self.overlay.PRIMARY_TEXT_COLOR, self.overlay.PRIMARY_COLOR)
         self.surface.blit(title_surface, (self.overlay.border_offset, self.overlay.border_offset))
 

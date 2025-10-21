@@ -133,7 +133,6 @@ class DeveloperConsole(BaseElement):
         self.children.append(self.input_box)
         self.children.append(submit_button)
 
-
     def dev_console_autocomplete(self, text: str) -> tuple[int, list["Autocomplete.Option"]]:
         if not text:
             return 0, []
@@ -154,7 +153,7 @@ class DeveloperConsole(BaseElement):
                             continue
                 options.append(Autocomplete.Option(command + " ", str(retrieved_value) if retrieved_value is not None else "", False))
             return position, options
-        elif len(words) > 1:
+        else:
             position = len(words[0]) + 1
             command: Callable[[...], Any] | None = self.get_all_commands().get(words[0])
             if not command:
@@ -346,6 +345,7 @@ class DeveloperConsole(BaseElement):
                         cursive = True
                     options.append(Autocomplete.Option(current_name, hint, cursive))
                 return position, options
+        return None
 
     @console_command(is_cheat_protected=True, show_return_value=True, autocomplete_function=eval_exec_autocomplete)
     def eval(self, eval_string: str):
@@ -385,6 +385,7 @@ class DeveloperConsole(BaseElement):
 
     @console_command("bind", autocomplete_function=bind_autocomplete)
     def bind_command(self, key: str, command: str = None) -> None:
+        """Binds a command to a key. Allows binding multiple commands to one key."""
         key_constant: int | None = self.KEY_MAPPING.get(key)
         if key_constant is None:
             self.log.print(f"{key} is an invalid key", color=self.overlay.ERROR_COLOR, mirror_to_stdout=True)
@@ -405,6 +406,7 @@ class DeveloperConsole(BaseElement):
 
     @console_command("unbind", autocomplete_function=unbind_autocomplete)
     def unbind_command(self, key: str):
+        """Unbinds all bound commands from the given key."""
         key_constant: int | None = self.KEY_MAPPING.get(key)
         if key_constant is None:
             self.log.print(f"{key} is an invalid key", color=self.overlay.ERROR_COLOR, mirror_to_stdout=True)
@@ -492,10 +494,10 @@ class DeveloperConsole(BaseElement):
         string += f"-> {return_type_name}" if return_type_name != "NoneType" else ""
         self.log.print(string, mirror_to_stdout=True)
 
-    def resize(self, new_height: int = 100):
+    def resize(self, size: tuple[int, int]):
         # This is janky af
         old_height = self.surface.get_height()
-        new_height = min(self.overlay.surface.get_height(), max(self.input_box.surface.get_height() + 2 * self.overlay.border_offset, new_height))
+        new_height = min(self.overlay.surface.get_height(), max(self.input_box.surface.get_height() + 2 * self.overlay.border_offset, size[1]))
         diff = new_height - old_height
         self.rect.h = new_height
         for child in self.children:
@@ -506,9 +508,9 @@ class DeveloperConsole(BaseElement):
         if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
             self.toggle_dev_console()
         elif event.type == pg.KEYDOWN and (event.key == 1073741921 or event.key == pg.K_PAGEUP):
-            self.resize(self.surface.get_height() - 50)
+            self.resize((self.surface.get_width(), self.surface.get_height() - 50))
         elif event.type == pg.KEYDOWN and (event.key == 1073741915 or event.key == pg.K_PAGEDOWN):
-            self.resize(self.surface.get_height() + 50)
+            self.resize((self.surface.get_width(), self.surface.get_height() + 50))
         elif event.type == pg.MOUSEWHEEL:
             self.log.history_index -= event.y
             self.log.history_index = max(0, min(self.log.history_index, len(self.log.history)-1))

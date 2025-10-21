@@ -1,6 +1,5 @@
 import pygame as pg
 import sys
-from typing import Any
 from types import SimpleNamespace
 from .elements.dev_console import DeveloperConsole, Logger, OutputRedirector
 from .elements import BaseElement, Autocomplete
@@ -22,13 +21,14 @@ class DeveloperOverlay(BaseElement):
 
     def __init__(self,
                  surface: pg.Surface,
-                 namespaces: dict[str:Any] | None = None,
+                 namespaces: dict[str, object] | None = None,
                  *,
                  enable_cheats: bool = False,
                  primary_font_override: pg.font.Font | None = None,
                  secondary_font_override: pg.font.Font | None = None,
                  logger_font_override: pg.font.Font | None = None,
-                 target_framerate: float | None = None):
+                 target_framerate: float | None = None,
+                 ) -> None:
         super().__init__(self, None, pg.Rect((0, 0), surface.get_size()))
         self.surface = surface
         self.font = primary_font_override or pg.font.Font(load_file_stream("clacon2.ttf"), 20)
@@ -88,7 +88,10 @@ class DeveloperOverlay(BaseElement):
                 if self.selected_child is None:
                     self.selected_child = self.children[0]
                     return True
-                self.get_selected_element().select_next()
+                selected_element = self.get_selected_element()
+                if selected_element is None:  # TODO: can selected_element ever be None here?
+                    return True
+                selected_element.select_next()
                 return True
             else:
                 self.in_tab_mode = False
@@ -126,7 +129,7 @@ class DeveloperOverlay(BaseElement):
         else:
             return 0, 255, 0
 
-    def draw_fps_counter(self, surface: pg.Surface):
+    def draw_fps_counter(self, surface: pg.Surface) -> None:
         if not self._frame_times_ms:
             return
         avg_fps = 1000 / (sum(self._frame_times_ms) / len(self._frame_times_ms))
@@ -137,7 +140,7 @@ class DeveloperOverlay(BaseElement):
         surface.blit(self.font.render(f"FPS: {int(avg_fps)}", True, fps_color), (2, 2))
         surface.blit(self.font.render(f"MAX: {max_frame_time}ms", True, frame_time_color), (2, 22))
 
-    def render(self):
+    def render(self) -> None:
         if self._show_fps:
             elapsed_time_seconds: float = perf_counter() - self._start_time
             self._frame_times_ms.append(int(elapsed_time_seconds * 1000))
@@ -151,7 +154,7 @@ class DeveloperOverlay(BaseElement):
                 self._logger.render(self.surface)
             if self._show_fps:
                 self.draw_fps_counter(self.surface)
-            if self.autocomplete.show:
+            if self.autocomplete.show and self.autocomplete.input_box is not None:
                 self.autocomplete.draw()
                 self.surface.blit(self.autocomplete.surface, (
                 self.autocomplete.rect.left + self.autocomplete.input_box.get_letter_x(self.autocomplete.position),
@@ -166,7 +169,7 @@ class DeveloperOverlay(BaseElement):
         for child in self.children:
             child.render_recursively(self.surface)
 
-        if self.autocomplete.show:
+        if self.autocomplete.show and self.autocomplete.input_box is not None:
             self.autocomplete.draw()
             self.surface.blit(self.autocomplete.surface, (self.autocomplete.rect.left + self.autocomplete.input_box.get_letter_x(self.autocomplete.position),
                                                      self.autocomplete.rect.top))

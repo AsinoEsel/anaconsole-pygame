@@ -8,7 +8,13 @@ if TYPE_CHECKING:
 class BaseElement:
     INSET: bool = False
 
-    def __init__(self, overlay: "DeveloperOverlay", parent: Optional["BaseElement"], rect: pg.Rect, *, colorkey: tuple[int, int, int] | None = None):
+    def __init__(self,
+                 overlay: "DeveloperOverlay",
+                 parent: Optional["BaseElement"],
+                 rect: pg.Rect,
+                 *,
+                 colorkey: tuple[int, int, int] | None = None
+                 ) -> None:
         self.overlay: "DeveloperOverlay" = overlay
         self.parent: BaseElement | None = parent
         self.rect: pg.Rect = rect
@@ -22,7 +28,7 @@ class BaseElement:
         from anaconsole.dev_overlay import DeveloperOverlay
         current = self
         current_x, current_y = 0, 0
-        while not isinstance(current, DeveloperOverlay):
+        while current.parent is not None:
             current_x += current.rect.left
             current_y += current.rect.top
             current = current.parent
@@ -92,6 +98,12 @@ class BaseElement:
         pg.draw.line(self.surface, secondary_color, (left + width, top), (left + width, top + height), 1)
         pg.draw.line(self.surface, primary_color, (left, top), (left + width, top), 1)
         pg.draw.line(self.surface, secondary_color, (left, top + height), (left + width, top + height), 1)
+
+    def resize(self, size: tuple[int, int]):
+        colorkey: tuple[int, int, int, int] | None = self.surface.get_colorkey()
+        self.surface = pg.Surface(size)
+        if colorkey:
+            self.surface.set_colorkey(colorkey)
 
     def render(self):
         self.render_body()
