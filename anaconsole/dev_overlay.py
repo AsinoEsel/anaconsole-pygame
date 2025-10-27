@@ -83,7 +83,7 @@ class DeveloperOverlay(BaseElement):
 
         # Do tabbing logic
         if event.type == pg.KEYDOWN:
-            if event.key == pg.K_TAB:
+            if event.key == pg.K_TAB and self.open:
                 self.in_tab_mode = True
                 if self.selected_child is None:
                     self.selected_child = self.children[0]
