@@ -58,4 +58,5 @@ if __name__ == "__main__":
         anaconsole.render()
 
         pygame.display.flip()
+        pygame.event.pump()
         clock.tick(FRAMERATE)
