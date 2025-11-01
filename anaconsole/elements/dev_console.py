@@ -351,7 +351,9 @@ class DeveloperConsole(BaseElement):
     def eval(self, eval_string: str):
         """Evaluate an arbitrary string"""
         try:
-            return eval(eval_string, None, self.overlay.namespace.__dict__)
+            return_value = eval(eval_string, None, self.overlay.namespace.__dict__)
+            self.overlay.namespace.__dict__["_"] = return_value
+            return return_value
         except Exception as e:
             self.print_exception_to_log(e)
 
