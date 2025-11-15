@@ -476,7 +476,7 @@ class DeveloperConsole(BaseElement):
 
     def print_usage_string(self, func: Callable[..., Any]):
         aliases = getattr(func, "_aliases", None)
-        string = f"Usage: {"/".join(aliases)} " if aliases else f"Usage: {func.__name__} "
+        string = f"Usage: {'/'.join(aliases)} " if aliases else f"Usage: {func.__name__} "
         for param_name, param in inspect.signature(func).parameters.items():
             param_type = get_type_hints(func).get(param_name, "undef")
 
@@ -490,7 +490,7 @@ class DeveloperConsole(BaseElement):
             param_default = param.default if param.default is not inspect.Parameter.empty else None
             if type(param_default) is str:
                 param_default = "'" + param_default + "'"
-            string += f"<{param_type_name} {param_name}{"=" + str(param_default) if param_default else ""}> "
+            string += f"<{param_type_name} {param_name}{'=' + str(param_default) if param_default else ''}> "
         return_type = get_type_hints(func).get('return', "undef")
         return_type_name = return_type.__name__ if return_type != "undef" else "undef"
         string += f"-> {return_type_name}" if return_type_name != "NoneType" else ""
