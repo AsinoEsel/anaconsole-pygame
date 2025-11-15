@@ -64,6 +64,8 @@ class InputBox(BaseElement):
                 self.select_all()
         elif event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE and self.in_edit_mode:
             self.escape()
+        elif event.type == pg.KEYDOWN and event.key == pg.K_RETURN and not self.in_edit_mode:
+            self.in_edit_mode = True
         elif event.type == pg.TEXTINPUT and self.in_edit_mode and (len(self.text) < self.max_chars or self.selection_range):
             if event.text in self.PAIRED_DELIMITERS.keys() and self.selection_range:
                 self.text = (self.text[:min(self.selection_range)]
